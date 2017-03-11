@@ -31,7 +31,7 @@ private:
 class matrix{
 public:
     matrix(string dict);//generates a random key
-    void genKeyMatrix();//generate the frequency matrix for the current key
+    void genKeyMatrix(int index);//generate the frequency matrix for the current key
     void genFreqMatrix();//generate the frequency matrix for the dictionary(only necessary once)
     double score(int index);//score for keyMatrix[index]
     bool compare(key A, key B);//compare score of A and B return true if A is better
@@ -71,7 +71,6 @@ int main(){
             encrypted = readFromFile("/Users/pierules53/Desktop/Current\ Homework/Crypto/Homophonic/Cypher.txt");
             dict = readFromFile("/Users/pierules53/Desktop/Current\ Homework/Crypto/Homophonic/english_words.txt");
             matrix compare(dict);
-            cout<<dict<<endl;
             cypher = toVector(encrypted);
             firstKey.printKey();
             compare.printFreqMatrix();
@@ -128,8 +127,31 @@ void key::printKey(){
     cout <<endl;
 }
 ////////////////////////////////////////
-void matrix::genKeyMatrix(){
-    //freqMatrix[LETTERS_VALUE.find(A)][LETTERS_VALUE.find(B)]=freqMatrix[LETTERS_VALUE.find(A)][LETTERS_VALUE.find(B)] + 1;
+void matrix::genKeyMatrix(int index){
+    double first = 1;
+    int second = 0;
+    char uno, dos;
+    while(first < dictionary.size()){
+        if(dictionary[first] == '\n')
+            uno = ' ';
+        else
+            uno = dictionary[first];
+        if(dictionary[second] == '\n')
+            dos = ' ';
+        else
+            dos = dictionary[second];
+        
+        keyMatrix[index][LETTERS_VALUE.find(uno)->second][LETTERS_VALUE.find(dos)->second] =
+        keyMatrix[index][LETTERS_VALUE.find(uno)->second][LETTERS_VALUE.find(dos)->second] + 1;
+        first++;
+        second++;
+        //printFreqMatrix();
+        //cout<<uno<<dos<<endl;
+    }
+    for(int i=0;i<27;i++){
+        for(int j=0;j<27;j++)
+            keyMatrix[index][i][j] = keyMatrix[index][i][j] / first;
+    }
 }
 ////////////////////////////////////////
 void matrix::genFreqMatrix(){
@@ -153,15 +175,15 @@ void matrix::genFreqMatrix(){
         //printFreqMatrix();
         //cout<<uno<<dos<<endl;
     }
-    for(int i=0;i<26;i++){
-        for(int j=0;j<26;j++)
-            keyMatrix[i][j] = double(keyMatrix[i][j]) / first;
+    for(int i=0;i<27;i++){
+        for(int j=0;j<27;j++)
+            freqMatrix[i][j] = freqMatrix[i][j] / first;
     }
 }
 ////////////////////////////////////////
 void matrix::printMatrix(int index){
-    for(int i=0;i<26;i++){
-        for(int j=0;j<26;j++)
+    for(int i=0;i<27;i++){
+        for(int j=0;j<27;j++)
             cout<<keyMatrix[index][i][j]<< ", ";
         cout<<endl;
     }
