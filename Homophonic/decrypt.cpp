@@ -15,14 +15,24 @@ using namespace std;
 map<char,int> LETTERS_FREQUENCY = { {' ', 19}, {'a',7}, {'b',1}, {'c',2}, {'d',4}, {'e',10}, {'f',2} ,{'g',2} ,{'h',5} , {'i',6},{'j',1},{'k',1},{'l',3},{'m',2},{'n',6},{'o',6},{'p',2},{'q',1},{'r',5},{'s',5},{'t',7},{'u',2} ,{'v',1},{'w',2},{'x',1},{'y',2},{'z',1} };
 map<char,int> LETTERS_VALUE = { {' ', 0}, {'a',1}, {'b',2}, {'c',3}, {'d',4}, {'e',5}, {'f',6} ,{'g',7} ,{'h',8} , {'i',9},{'j',10},{'k',11},{'l',12},{'m',13},{'n',14},{'o',15},{'p',16},{'q',17},{'r',18},{'s',19},{'t',20},{'u',21} ,{'v',22},{'w',23},{'x',24},{'y',25},{'z',26} };
 
+class matrix{
+public:
+    matrix();//generates a random key
+private:
+    double values[26];
+};
+
 class key{
 public:
     key();//generates a random key
-    key mutate(int mutate = 2);//mutates the key by specified value
+    void mutate(int mutate);//mutates the key by specified value
+    double score();//score the current key
+    void optimize();//use the score to mutate a better key
     void printKey();
     vector<char> getKey();
 private:
     vector<char> keyVals;
+    vector<char> newKey;
     int keyLength = 106;
 };
 
@@ -49,21 +59,19 @@ int main(){
     while(!done){
         cout<<"Enter option:\n(1)load file 'Cypher.txt'\n(2)enter via keyboard"<<endl;
         cin>>input;
-        cout<<"ROIPIPRIOPOI";
-
         key firstKey;
         if (input == "1"){
-            encrypted = readFromFile("/Users/pierules53/Desktop/Current\ Homework/Crypto/Cypher.txt");
-            dict = readFromFileLines("/Users/pierules53/Desktop/Current\ Homework/Crypto/english_words.txt");
+            encrypted = readFromFile("/Users/pierules53/Desktop/Current\ Homework/Crypto/Homophonic/Cypher.txt");
+            dict = readFromFileLines("/Users/pierules53/Desktop/Current\ Homework/Crypto/Homophonic/venglish_words.txt");
             cypher = toVector(encrypted);
             firstKey.printKey();
             string guess = decrypt(dict,cypher,firstKey.getKey());
-            printGuess(guess);
+            //printGuess(guess);
             done = true;
         }
         else if (input == "2"){
             cin>>encrypted;
-            dict = readFromFileLines("/Users/pierules53/Desktop/Current\ Homework/Crypto/english_words.txt");
+            dict = readFromFileLines("/Users/pierules53/Desktop/Current\ Homework/Crypto/Homophonic/english_words.txt");
             cypher = toVector(encrypted);
             string guess = decrypt(dict,cypher,firstKey.getKey());
             printGuess(guess);
@@ -75,7 +83,7 @@ int main(){
     }
 return 0;
 }
-////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
 key::key(void){
     map<char, int>::iterator it;
     map<char, int>::iterator it2;
@@ -107,6 +115,28 @@ void key::printKey(){
 ////////////////////////////////////////
 vector<char> key::getKey(){
     return keyVals;
+}
+////////////////////////////////////////
+double key::score(){
+    int score = 0;
+    //compare key matrix to frequency matrix
+    //for each value add absolute value of (frequency matrix - key matrix) to score
+    return 1/score;
+}
+////////////////////////////////////////
+void key::mutate(int mutation){
+    //mutate the cipher by a given mutation key
+    //swap
+    int score = 0;
+}
+////////////////////////////////////////
+void key::optimize(){
+    int score = 0;
+    //generate score
+    //swap one row
+    //if new score higher, keep
+    //else trash
+    //continue
 }
 ///////////////////////////////////////
 string readFromFile(string filename){
