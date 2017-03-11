@@ -15,18 +15,10 @@ using namespace std;
 map<char,int> LETTERS_FREQUENCY = { {' ', 19}, {'a',7}, {'b',1}, {'c',2}, {'d',4}, {'e',10}, {'f',2} ,{'g',2} ,{'h',5} , {'i',6},{'j',1},{'k',1},{'l',3},{'m',2},{'n',6},{'o',6},{'p',2},{'q',1},{'r',5},{'s',5},{'t',7},{'u',2} ,{'v',1},{'w',2},{'x',1},{'y',2},{'z',1} };
 map<char,int> LETTERS_VALUE = { {' ', 0}, {'a',1}, {'b',2}, {'c',3}, {'d',4}, {'e',5}, {'f',6} ,{'g',7} ,{'h',8} , {'i',9},{'j',10},{'k',11},{'l',12},{'m',13},{'n',14},{'o',15},{'p',16},{'q',17},{'r',18},{'s',19},{'t',20},{'u',21} ,{'v',22},{'w',23},{'x',24},{'y',25},{'z',26} };
 
-class matrix{
-public:
-    matrix();//generates a random key
-private:
-    double values[26];
-};
-
 class key{
 public:
     key();//generates a random key
     void mutate(int mutate);//mutates the key by specified value
-    double score();//score the current key
     void optimize();//use the score to mutate a better key
     void printKey();
     vector<char> getKey();
@@ -36,11 +28,26 @@ private:
     int keyLength = 106;
 };
 
+class matrix{
+public:
+    matrix(string dict);//generates a random key
+    void genKeyMatrix();//generate the frequency matrix for the current key
+    void genFreqMatrix();//generate the frequency matrix for the dictionary(only necessary once)
+    double score(int index);//score for keyMatrix[index]
+    bool compare(key A, key B);//compare score of A and B return true if A is better
+    void printMatrix(int index);
+    void printFreqMatrix();
+private:
+    double freqMatrix[27][27];
+    double keyMatrix[4][27][27];
+    string dictionary;
+};
+
 
 void decryptString(string& encryptedString, ifstream& ifs, int rotation, string& decryptedString);
 string readFromFile(string filename);
 vector<int> toVector(string cypher);
-string decrypt(vector<string> dict, vector<int> cypher, vector<char> key);
+string decrypt(vector<int> cypher, vector<char> key);
 void printGuess(string guess);
 vector<string> readFromFileLines(string filename);
 
@@ -50,7 +57,7 @@ vector<string> readFromFileLines(string filename);
 int main(){
 
     string encrypted = ""; // store the original text in a string
-    vector<string> dict;
+    string dict = "";
     vector<int> cypher;
     string decryptedString = ""; // assemble the decrypted text here
     string input = "0";
@@ -62,18 +69,21 @@ int main(){
         key firstKey;
         if (input == "1"){
             encrypted = readFromFile("/Users/pierules53/Desktop/Current\ Homework/Crypto/Homophonic/Cypher.txt");
-            dict = readFromFileLines("/Users/pierules53/Desktop/Current\ Homework/Crypto/Homophonic/venglish_words.txt");
+            dict = readFromFile("/Users/pierules53/Desktop/Current\ Homework/Crypto/Homophonic/english_words.txt");
+            matrix compare(dict);
+            cout<<dict<<endl;
             cypher = toVector(encrypted);
             firstKey.printKey();
-            string guess = decrypt(dict,cypher,firstKey.getKey());
+            compare.printFreqMatrix();
+            string guess = decrypt(cypher,firstKey.getKey());
             //printGuess(guess);
             done = true;
         }
         else if (input == "2"){
             cin>>encrypted;
-            dict = readFromFileLines("/Users/pierules53/Desktop/Current\ Homework/Crypto/Homophonic/english_words.txt");
+            dict = readFromFile("/Users/pierules53/Desktop/Current\ Homework/Crypto/Homophonic/english_words.txt");
             cypher = toVector(encrypted);
-            string guess = decrypt(dict,cypher,firstKey.getKey());
+            string guess = decrypt(cypher,firstKey.getKey());
             printGuess(guess);
             done = true;
         }
@@ -106,6 +116,11 @@ key::key(void){
     }
 }
 ////////////////////////////////////////
+matrix::matrix(string dict){
+    dictionary = dict;
+    genFreqMatrix();
+}
+////////////////////////////////////////
 void key::printKey(){
     for(int i = 0; i < keyVals.size(); i++){
             cout <<keyVals[i]<<", ";
@@ -113,15 +128,72 @@ void key::printKey(){
     cout <<endl;
 }
 ////////////////////////////////////////
+void matrix::genKeyMatrix(){
+    //freqMatrix[LETTERS_VALUE.find(A)][LETTERS_VALUE.find(B)]=freqMatrix[LETTERS_VALUE.find(A)][LETTERS_VALUE.find(B)] + 1;
+}
+////////////////////////////////////////
+void matrix::genFreqMatrix(){
+    double first = 1;
+    int second = 0;
+    char uno, dos;
+    while(first < dictionary.size()){
+        if(dictionary[first] == '\n')
+            uno = ' ';
+        else
+            uno = dictionary[first];
+        if(dictionary[second] == '\n')
+            dos = ' ';
+        else
+            dos = dictionary[second];
+        
+        freqMatrix[LETTERS_VALUE.find(uno)->second][LETTERS_VALUE.find(dos)->second] =
+            freqMatrix[LETTERS_VALUE.find(uno)->second][LETTERS_VALUE.find(dos)->second] + 1;
+        first++;
+        second++;
+        //printFreqMatrix();
+        //cout<<uno<<dos<<endl;
+    }
+    for(int i=0;i<26;i++){
+        for(int j=0;j<26;j++)
+            keyMatrix[i][j] = double(keyMatrix[i][j]) / first;
+    }
+}
+////////////////////////////////////////
+void matrix::printMatrix(int index){
+    for(int i=0;i<26;i++){
+        for(int j=0;j<26;j++)
+            cout<<keyMatrix[index][i][j]<< ", ";
+        cout<<endl;
+    }
+}
+////////////////////////////////////////
+void matrix::printFreqMatrix(){
+    for(int i=0;i<27;i++){
+        for(int j=0;j<27;j++)
+            cout<<freqMatrix[i][j]<< ", ";
+        cout<<endl;
+    }
+}
+////////////////////////////////////////
 vector<char> key::getKey(){
     return keyVals;
 }
 ////////////////////////////////////////
-double key::score(){
+double matrix::score(int index){
     int score = 0;
-    //compare key matrix to frequency matrix
+    //compare keyMatrix[ to frequency matrix
     //for each value add absolute value of (frequency matrix - key matrix) to score
-    return 1/score;
+    return score;
+}
+////////////////////////////////////////
+bool matrix::compare(key A, key B){
+    int score1,score2;
+    //generate both matrixes
+    //compare key matrix score to frequency matrix score
+    if (score1<score2)
+        return true;
+    else
+        return false;
 }
 ////////////////////////////////////////
 void key::mutate(int mutation){
@@ -193,7 +265,7 @@ vector<int> toVector(string cypher){
     return out;
 }
 /////////////////////////////////////////////
-string decrypt(vector<string> dict, vector<int> cypher, vector<char> key){
+string decrypt(vector<int> cypher, vector<char> key){
     string out = "";
     for(int i = 0; i < cypher.size();i++){
         out =out + key[cypher[i]] ;
