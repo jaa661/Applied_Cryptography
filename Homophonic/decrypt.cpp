@@ -81,14 +81,13 @@ int main(){
             encrypted = readFromFile("/Users/pierules53/Desktop/Current\ Homework/Crypto/Homophonic/Cypher.txt");
             dict = readFromFile("/Users/pierules53/Desktop/Current\ Homework/Crypto/Homophonic/english_words.txt");
             matrix compare(encrypted, dict);
+            compare.printFreqMatrix();
             for(int i= 0;i<10;i++){
                firstKey.randomize();
-                firstKey.printKey();
                secondKey.randomize();
-                secondKey.printKey();
                compare.compare(firstKey, secondKey);
             }
-            compare.compare(firstKey, secondKey);
+            compare.printFreqMatrix();
             //cypher = toVector(encrypted);
             string guess = decrypt(toVector(encrypted),firstKey.getKey());
             //printGuess(guess);
@@ -132,6 +131,7 @@ key::key(void){
 }
 ////////////////////////////////////////
 void key::randomize(){
+    keyVals.clear();
     map<char, int>::iterator it;
     map<char, int>::iterator it2;
     int randomIndex;
@@ -156,7 +156,6 @@ void key::randomize(){
 matrix::matrix(string plain, string dict){
     dictionary = dict;
     plaintext = plain;
-    genFreqMatrix();
     for(int i=0;i<27;i++){
         for(int j=0;j<27;j++)
             freqMatrix[i][j] = 0;
@@ -169,6 +168,7 @@ matrix::matrix(string plain, string dict){
         for(int j=0;j<27;j++)
             keyMatrixDos[i][j] = 0;
     }
+    genFreqMatrix();
 }
 ////////////////////////////////////////
 void key::printKey(){
@@ -179,6 +179,10 @@ void key::printKey(){
 }
 ////////////////////////////////////////
 void matrix::genKeyMatrixDos(key A){
+    for(int i=0;i<27;i++){
+        for(int j=0;j<27;j++)
+            keyMatrixDos[i][j] = 0;
+    }
     string decrypted = decrypt(toVector(plaintext),A.getKey());
     //cout<< decrypted;
     double first = 1;
@@ -204,7 +208,7 @@ void matrix::genKeyMatrixDos(key A){
     for(int i=0;i<27;i++){
         for(int j=0;j<27;j++){
             //cout<<keyMatrixDos[i][j]<<",";
-            keyMatrixDos[i][j] = keyMatrixDos[i][j]/first;
+            keyMatrixDos[i][j] = keyMatrixDos[i][j];
         }
         //cout<<endl;
     }
@@ -212,6 +216,10 @@ void matrix::genKeyMatrixDos(key A){
 }
 ////////////////////////////////////////
 void matrix::genKeyMatrix(key A){
+    for(int i=0;i<27;i++){
+        for(int j=0;j<27;j++)
+            keyMatrix[i][j] = 0;
+    }
     string decrypted = decrypt(toVector(plaintext),A.getKey());
     //cout<< decrypted;
     double first = 1;
@@ -238,7 +246,7 @@ void matrix::genKeyMatrix(key A){
         for(int j=0;j<27;j++){
             //cout<<keyMatrix[i][j]<<",";
             //cout<<first<<endl;
-            keyMatrix[i][j] = keyMatrix[i][j]/first;
+            keyMatrix[i][j] = keyMatrix[i][j];
             //cout<<keyMatrix[i][j]<<endl;
         }
         //cout<<endl;
@@ -269,7 +277,7 @@ void matrix::genFreqMatrix(){
     }
     for(int i=0;i<27;i++){
         for(int j=0;j<27;j++)
-            freqMatrix[i][j] = freqMatrix[i][j] / first;
+            freqMatrix[i][j] = freqMatrix[i][j];
     }
 }
 ////////////////////////////////////////
@@ -337,9 +345,7 @@ bool matrix::compare(key A, key B){
     genKeyMatrixDos(B);
     //compare key matrix score to frequency matrix score
     score1 = score();
-    cout<<score1<<endl;
     score2 = scoreDos();
-    cout<<score2<<endl;
     if (score1<=score2)
         return true;
     else
