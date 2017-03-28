@@ -63,7 +63,8 @@ string decrypt(vector<int> cypher, vector<char> key);
 void printGuess(string guess);
 vector<string> readFromFileLines(string filename);
 key findBestKey(string encrypted,string dict);// generates random keys and optimizes them, keeping the best one
-
+vector<string> seperatePlaintext(string dict);
+key findBestKeyPlain(string encrypted, vector<string> plain);
 
 
 
@@ -81,8 +82,10 @@ int main(){
         cin>>input;
         key firstKey,secondKey;
         if (input == "1"){
-            encrypted = readFromFile("/Users/pierules53/Desktop/Current\ Homework/Crypto/Homophonic/Cypher.txt");
+            encrypted = readFromFile("/Users/pierules53/Desktop/Current\ Homework/Crypto/Homophonic/cipher2.txt");
             dict = readFromFile("/Users/pierules53/Desktop/Current\ Homework/Crypto/Homophonic/plaintext_dictionary.txt");
+            vector<string> plain = seperatePlaintext(dict);
+            key thing = findBestKeyPlain(encrypted, plain);
             matrix compare(encrypted, dict);// create an instace of the matrix class
             //compare.printFreqMatrix();
             firstKey = findBestKey(encrypted,dict);// call find best key
@@ -107,7 +110,21 @@ int main(){
     }
 return 0;
 }
-/////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+vector<string> seperatePlaintext(string dict){
+    vector<string> answers;
+    int a = dict.find("biorhythmic");
+    answers.push_back(dict.substr(0, a));
+    int b = dict.find("banisters");
+    answers.push_back(dict.substr(a, b-a));
+    a = dict.find("deathful");
+    answers.push_back(dict.substr(b, a-b));
+    b = dict.find("grovel");
+    answers.push_back(dict.substr(a, b-a));
+    answers.push_back(dict.substr(b, dict.size()-b));
+    return answers;
+}
+//////////////////////////////////////
 key::key(void){
     map<char, int>::iterator it;
     map<char, int>::iterator it2;
@@ -138,7 +155,32 @@ key findBestKey(string encrypted, string dict){
     matrix test(encrypted, dict);
     bestScore = test.score(bestKey);
     cout<<bestScore<<endl;
-    for(int i = 0; i < 50; i++){
+    for(int i = 0; i < 10; i++){
+        testKey.randomize();
+        if(test.score(testKey)) {
+            testKey = test.optimize(testKey);
+            score = test.score(testKey);
+            if (score < bestScore){
+                bestKey = testKey;
+                cout<<setprecision(9)<<"#"<<i<<": "<<score<<"----->"<<bestScore<<endl;
+                bestScore = score;
+            }
+            else
+                cout<<setprecision(9)<<"#"<<i<<": "<<score<<"xxxxxx"<<bestScore<<endl;
+        }
+    }
+    return bestKey;
+}
+////////////////////////////////////////
+key findBestKeyPlain(string encrypted, vector<string> plain){
+    key bestKey;
+    key testKey;
+    double score;
+    double bestScore;
+    matrix test(encrypted, dict);
+    bestScore = test.score(bestKey);
+    cout<<bestScore<<endl;
+    for(int i = 0; i < 10; i++){
         testKey.randomize();
         if(test.score(testKey)) {
             testKey = test.optimize(testKey);
@@ -388,13 +430,15 @@ key matrix::optimize(key currentKey){
     newKey.keyVals = currentKey.keyVals;
     char temp;
     int x =1;
+    bool b = false;
     double sco = 0;
     sco = score(currentKey);
     //while (score(currentKey) < sco+.000001){
-    while(true){
+
     sco = score(currentKey);
     for(int i = 0;i<106;i++){
         //cout<<sco<<endl;
+        if(b == false){
         for (int j = 0; j < 106; j++) {
             newKey.keyVals = currentKey.keyVals;
             if (i == j) {
@@ -418,10 +462,12 @@ key matrix::optimize(key currentKey){
             }
         }
         x++;
-        cout<<score(currentKey)<<"HHHHHHH"<<sco-5<<endl;
-        if(x%5==0){
-            if(score(currentKey) > sco-5)
-                break;
+        cout<<score(currentKey)<<"<<<<<<"<<sco-.005<<endl;
+        if(x%10==0){
+            //cout<<"break"<<endl;
+            if(score(currentKey) > sco-.005){
+                b = true;
+            }
             else
                 sco = score(currentKey);
         }
