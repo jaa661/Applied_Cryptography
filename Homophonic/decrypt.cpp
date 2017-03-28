@@ -64,7 +64,7 @@ void printGuess(string guess);
 vector<string> readFromFileLines(string filename);
 key findBestKey(string encrypted,string dict);// generates random keys and optimizes them, keeping the best one
 vector<string> seperatePlaintext(string dict);
-key findBestKeyPlain(string encrypted, vector<string> plain);
+key findBestKeyPlain(vector<int> cypher, vector<string> plain);
 
 
 
@@ -85,7 +85,7 @@ int main(){
             encrypted = readFromFile("/Users/pierules53/Desktop/Current\ Homework/Crypto/Homophonic/cipher2.txt");
             dict = readFromFile("/Users/pierules53/Desktop/Current\ Homework/Crypto/Homophonic/plaintext_dictionary.txt");
             vector<string> plain = seperatePlaintext(dict);
-            key thing = findBestKeyPlain(encrypted, plain);
+            key thing = findBestKeyPlain(toVector(encrypted), plain);
             matrix compare(encrypted, dict);// create an instace of the matrix class
             //compare.printFreqMatrix();
             firstKey = findBestKey(encrypted,dict);// call find best key
@@ -172,28 +172,8 @@ key findBestKey(string encrypted, string dict){
     return bestKey;
 }
 ////////////////////////////////////////
-key findBestKeyPlain(string encrypted, vector<string> plain){
+key findBestKeyPlain(vector<int> cypher, vector<string> plain){
     key bestKey;
-    key testKey;
-    double score;
-    double bestScore;
-    matrix test(encrypted, dict);
-    bestScore = test.score(bestKey);
-    cout<<bestScore<<endl;
-    for(int i = 0; i < 10; i++){
-        testKey.randomize();
-        if(test.score(testKey)) {
-            testKey = test.optimize(testKey);
-            score = test.score(testKey);
-            if (score < bestScore){
-                bestKey = testKey;
-                cout<<setprecision(9)<<"#"<<i<<": "<<score<<"----->"<<bestScore<<endl;
-                bestScore = score;
-            }
-            else
-                cout<<setprecision(9)<<"#"<<i<<": "<<score<<"xxxxxx"<<bestScore<<endl;
-        }
-    }
     return bestKey;
 }
 ////////////////////////////////////////
