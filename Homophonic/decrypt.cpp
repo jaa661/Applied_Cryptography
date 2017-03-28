@@ -24,6 +24,7 @@ public:
     void printKey();
     vector<char> getKey();
     void setKey(key A);
+    void blankKey();
     vector<char> keyVals;
     
 private:
@@ -82,15 +83,15 @@ int main(){
         cin>>input;
         key firstKey,secondKey;
         if (input == "1"){
-            encrypted = readFromFile("/Users/pierules53/Desktop/Current\ Homework/Crypto/Homophonic/cipher2.txt");
+            encrypted = readFromFile("/Users/pierules53/Desktop/Current\ Homework/Crypto/Homophonic/cipher10.txt");
             dict = readFromFile("/Users/pierules53/Desktop/Current\ Homework/Crypto/Homophonic/plaintext_dictionary.txt");
             vector<string> plain = seperatePlaintext(dict);
             key thing = findBestKeyPlain(toVector(encrypted), plain);
-            matrix compare(encrypted, dict);// create an instace of the matrix class
+            //matrix compare(encrypted, dict);// create an instace of the matrix class
             //compare.printFreqMatrix();
-            firstKey = findBestKey(encrypted,dict);// call find best key
+            //firstKey = findBestKey(encrypted,dict);// call find best key
             //compare.printFreqMatrix();
-            string guess = decrypt(toVector(encrypted),firstKey.getKey());// use best key to find best guess
+            string guess = decrypt(toVector(encrypted),thing.getKey());// use best key to find best guess
             printGuess(guess);
             done = true;
         }
@@ -113,11 +114,13 @@ return 0;
 ///////////////////////////////////////////////////////////////////////////
 vector<string> seperatePlaintext(string dict){
     vector<string> answers;
+    //cout<<"test"<<endl;
     int a = dict.find("biorhythmic");
     answers.push_back(dict.substr(0, a));
     int b = dict.find("banisters");
     answers.push_back(dict.substr(a, b-a));
     a = dict.find("deathful");
+    //cout<<"test"<<endl;
     answers.push_back(dict.substr(b, a-b));
     b = dict.find("grovel");
     answers.push_back(dict.substr(a, b-a));
@@ -147,6 +150,13 @@ key::key(void){
     }
 }
 ////////////////////////////////////////
+void key::blankKey(){
+    keyVals.clear();
+    for (int i =0; i < keyLength; i++){
+        keyVals.push_back('@');
+    }
+}
+////////////////////////////////////////
 key findBestKey(string encrypted, string dict){
     key bestKey;
     key testKey;
@@ -172,8 +182,36 @@ key findBestKey(string encrypted, string dict){
     return bestKey;
 }
 ////////////////////////////////////////
-key findBestKeyPlain(vector<int> cypher, vector<string> plain){
-    key bestKey;
+key findBestKeyPlain(vector<int> cypher, vector<string> plain) {
+    // cypher is the encrypted plaintext
+    // plain is a vector of strings, with each string being one of the 5 plaintexts
+    key bestKey; // correct key to return
+    key testKey; // key you are using to test
+    int bestTry = 0;
+    int prevBest = 0;
+    bool correct;
+    for (int i = 0; i < plain.size(); i++) { // check all 5 plaintexts in plain
+        testKey.blankKey();
+        cout<<"testing"<<endl;
+        for (int j = 0; j < plain[i].size(); j++) { // check every position in cypher and plain
+            cout<<cypher[j]<<","<<testKey.keyVals[cypher[j]]<<endl;
+            if (testKey.keyVals[cypher[j]] == '@' || testKey.keyVals[cypher[j]] == plain[i][j]) {
+                testKey.keyVals[cypher[j]] = plain[i][j];
+                bool correct = true;
+                bestTry = j;
+            }
+            else{
+                bool correct = false;
+                break;
+            }
+        }
+        if (bestTry > prevBest){
+            prevBest = bestTry;
+            bestKey = testKey;
+        }
+        if(correct == true)
+            break;
+    }
     return bestKey;
 }
 ////////////////////////////////////////

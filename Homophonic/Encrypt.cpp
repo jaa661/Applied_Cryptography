@@ -90,7 +90,7 @@ int main(){
     cout<<"Enter option:\n(1)load file 'Plaintext.txt'\n(2)enter via keyboard"<<endl;
     cin>>input;
     if (input == "1"){
-        plain = readFromFile("/Users/pierules53/Desktop/Current\ Homework/Crypto/Plaintext.txt");
+        plain = readFromFile("/Users/pierules53/Desktop/Current\ Homework/Crypto/Homophonic/Plaintext2.txt");
         cypher = encrypt(plain, maps);
         cout<<"Enter option:\n(1)output to file 'Cypher.txt'\n(2)output via keyboard"<<endl;
         cin>>input;
@@ -154,7 +154,7 @@ string readFromFile(string filename){
 ////////////////////////////////////////////////////
 void writeToFile(string cypher){
     ofstream myfile;
-    myfile.open ("/Users/pierules53/Desktop/Current\ Homework/Crypto/Cypher.txt");
+    myfile.open ("/Users/pierules53/Desktop/Current\ Homework/Crypto/Homophonic/Cypher.txt");
     myfile << cypher;
     myfile.close();
 }
